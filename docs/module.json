@@ -2,10 +2,11 @@
   "name": "web-terminal-docs",
   "version": "1.0.0",
   "type": "documentation",
-  "build": {
+  "hugo_config": {
     "template": "documentation",
     "theme": "compose",
-    "components": ["compose-theme"]
+    "components": [],
+    "hugo_version": "0.148.0"
   },
   "site": {
     "title": "Web Terminal Documentation",
