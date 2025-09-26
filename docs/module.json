@@ -21,7 +21,7 @@
     "destination": "terminal"
   },
   "build_settings": {
-    "hugo_version": "0.110.0",
+    "hugo_version": "0.148.0",
     "enable_analytics": false,
     "enable_search": true
   }
