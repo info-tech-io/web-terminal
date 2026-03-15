@@ -11,14 +11,14 @@
   "site": {
     "title": "Web Terminal Documentation",
     "description": "Dockerized web-based terminal interface for browser-based command line access",
-    "baseURL": "https://terminal.info-tech.io",
+    "baseURL": "https://info-tech-io.github.io",
     "language": "en",
     "author": "InfoTech.io Team",
     "product_name": "Web Terminal"
   },
   "content": {
     "source": "./content",
-    "destination": "terminal"
+    "destination": "docs/web-terminal"
   },
   "build_settings": {
     "hugo_version": "0.148.0",
