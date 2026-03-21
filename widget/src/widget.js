@@ -2,36 +2,35 @@ import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 
 // ---------------------------------------------------------------------------
-// Bootstrap: find the <script data-pack="..."> tag and mount widget
+// Bootstrap: mount all <script data-pack="..."> widgets on the page
 // ---------------------------------------------------------------------------
 
-(function () {
-  const scriptTag = document.currentScript || findScriptTag();
+function bootstrap() {
+  const tags = document.querySelectorAll('script[data-pack]');
+  tags.forEach(function (scriptTag) {
+    if (scriptTag._tpsMounted) return;
+    scriptTag._tpsMounted = true;
 
-  if (!scriptTag) {
-    console.error('[TPS Widget] Could not locate <script data-pack="..."> tag.');
-    return;
-  }
+    const pack     = scriptTag.dataset.pack;
+    const exercise = scriptTag.dataset.exercise || null;
+    const tpsUrl   = (scriptTag.dataset.tpsUrl || '').replace(/\/$/, '') || location.origin.replace(/\/$/, '');
 
-  const pack     = scriptTag.dataset.pack;
-  const exercise = scriptTag.dataset.exercise || null;
-  const tpsUrl   = (scriptTag.dataset.tpsUrl || '').replace(/\/$/, '') || location.origin.replace(/\/$/, '');
+    if (!pack) {
+      console.error('[TPS Widget] data-pack attribute is required.');
+      return;
+    }
 
-  if (!pack) {
-    console.error('[TPS Widget] data-pack attribute is required.');
-    return;
-  }
+    const container = document.createElement('div');
+    scriptTag.parentNode.insertBefore(container, scriptTag.nextSibling);
+    mount(container, { pack, exercise, tpsUrl });
+  });
+}
 
-  const container = document.createElement('div');
-  scriptTag.parentNode.insertBefore(container, scriptTag.nextSibling);
-
-  mount(container, { pack, exercise, tpsUrl });
-
-  function findScriptTag() {
-    const tags = document.querySelectorAll('script[data-pack]');
-    return tags.length ? tags[tags.length - 1] : null;
-  }
-})();
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootstrap);
+} else {
+  bootstrap();
+}
 
 // ---------------------------------------------------------------------------
 // State machine
