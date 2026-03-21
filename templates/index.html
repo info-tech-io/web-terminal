@@ -3,18 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Terminal Pool Service</title>
+  <title>Rustlings Demo — Web Terminal</title>
   <style>
-    body { font-family: sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; color: #333; }
-    a { color: #1565c0; }
+    * { box-sizing: border-box; }
+    body { font-family: sans-serif; max-width: 960px; margin: 40px auto; padding: 0 20px; color: #333; }
+    h1 { font-size: 1.6rem; margin-bottom: 4px; }
+    p { color: #555; margin-top: 4px; }
+    footer { margin-top: 24px; font-size: 0.8rem; color: #999; }
+    footer a { color: #999; }
   </style>
 </head>
 <body>
-  <h1>Terminal Pool Service</h1>
-  <p>API is running. Available endpoints:</p>
-  <ul>
-    <li><a href="/docs">Interactive API docs (Swagger)</a></li>
-    <li><a href="/api/packs">GET /api/packs</a> — list available packs</li>
-  </ul>
+  <h1>Rustlings in your browser</h1>
+  <p>Interactive Rust exercises — no install needed. Click the button to start.</p>
+
+  <script src="/widget/widget.js"
+          data-pack="rustlings"
+          data-tps-url="">
+  </script>
+
+  <footer>
+    <a href="/docs">API docs</a> · <a href="/api/packs">Pool status</a>
+  </footer>
 </body>
 </html>
