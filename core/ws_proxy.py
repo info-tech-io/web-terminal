@@ -5,43 +5,22 @@ import logging
 import docker
 from fastapi import WebSocket, WebSocketDisconnect
 
-from .config import settings
-
 logger = logging.getLogger(__name__)
 
 
-def _get_or_create_container(client: docker.DockerClient):
-    """Gets the running container or creates a new one."""
-    try:
-        container = client.containers.get(settings.tps_container_name)
-        if container.status != "running":
-            logger.info("Container exists but is not running. Starting...")
-            container.start()
-        else:
-            logger.info("Attaching to existing running container.")
-        return container
-    except docker.errors.NotFound:
-        logger.info("Container '%s' not found. Creating...", settings.tps_container_name)
-        container = client.containers.run(
-            settings.tps_image_name,
-            name=settings.tps_container_name,
-            tty=True,
-            stdin_open=True,
-            detach=True,
-            command="/bin/bash",
-        )
-        logger.info("Container '%s' created.", settings.tps_container_name)
-        return container
+async def handle_ws(websocket: WebSocket, container_id: str) -> None:
+    """Handle a WebSocket connection: bridge browser ↔ Docker PTY.
 
-
-async def handle_ws(websocket: WebSocket) -> None:
-    """Handle a WebSocket connection: bridge browser ↔ Docker PTY."""
+    Args:
+        websocket: FastAPI WebSocket connection.
+        container_id: ID of the pre-allocated container from the pool.
+    """
     await websocket.accept()
-    logger.info("WebSocket connection accepted.")
+    logger.info("WebSocket accepted for container %s.", container_id[:12])
 
     client = docker.from_env()
     try:
-        container = await asyncio.to_thread(_get_or_create_container, client)
+        container = await asyncio.to_thread(client.containers.get, container_id)
 
         exec_instance = await asyncio.to_thread(
             client.api.exec_create,
@@ -59,7 +38,7 @@ async def handle_ws(websocket: WebSocket) -> None:
         )
         sock = raw_socket._sock
         sock.setblocking(False)
-        logger.info("Attached to container exec instance.")
+        logger.info("Attached to exec on container %s.", container_id[:12])
 
         async def container_to_ws() -> None:
             loop = asyncio.get_event_loop()
@@ -101,4 +80,4 @@ async def handle_ws(websocket: WebSocket) -> None:
     except Exception as exc:
         logger.error("WS handler error: %s", exc)
     finally:
-        logger.info("WebSocket handler finished.")
+        logger.info("WebSocket handler finished for container %s.", container_id[:12])
