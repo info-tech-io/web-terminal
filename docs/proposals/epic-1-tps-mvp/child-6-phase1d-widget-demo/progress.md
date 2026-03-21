@@ -10,8 +10,8 @@ graph LR
     A["Stage 1\nWidget Core"] --> B["Stage 2\nBuild Pipeline"]
     B --> C["Stage 3\nDemo + GitHub Pages"]
 
-    style A fill:#fff9c4,stroke:#f9a825
-    style B fill:#eeeeee,stroke:#9e9e9e
+    style A fill:#c8e6c9,stroke:#2e7d32
+    style B fill:#fff9c4,stroke:#f9a825
     style C fill:#eeeeee,stroke:#9e9e9e
 ```
 
@@ -19,6 +19,6 @@ graph LR
 
 | Stage | Status | Started | Completed | Commits |
 |-------|--------|---------|-----------|---------|
-| 1. Widget Core | 🔄 In Progress | 2026-03-21 | — | — |
-| 2. Build Pipeline | ⏳ Planned | — | — | — |
+| 1. Widget Core | ✅ Complete | 2026-03-21 | 2026-03-21 | feat(issue-6): Stage 1 |
+| 2. Build Pipeline | 🔄 In Progress | 2026-03-21 | — | — |
 | 3. Demo + GitHub Pages | ⏳ Planned | — | — | — |

@@ -1,0 +1,16 @@
+{
+  "name": "tps-widget",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "esbuild src/widget.js --bundle --minify --outfile=widget.js --platform=browser --target=es2017",
+    "build:dev": "esbuild src/widget.js --bundle --outfile=widget.js --platform=browser --target=es2017 --sourcemap"
+  },
+  "dependencies": {
+    "@xterm/xterm": "^5.5.0",
+    "@xterm/addon-fit": "^0.10.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}
