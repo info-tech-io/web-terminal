@@ -1,7 +1,7 @@
 # Progress: Child #6 — Phase 1-D: JS Widget v1 + Demo Page
 
 **Issue**: [#6](https://github.com/info-tech-io/web-terminal/issues/6)
-**Status**: 🔄 In Progress
+**Status**: ✅ Complete
 
 ## Status Dashboard
 
@@ -12,7 +12,7 @@ graph LR
 
     style A fill:#c8e6c9,stroke:#2e7d32
     style B fill:#c8e6c9,stroke:#2e7d32
-    style C fill:#fff9c4,stroke:#f9a825
+    style C fill:#c8e6c9,stroke:#2e7d32
 ```
 
 ## Timeline
@@ -21,4 +21,4 @@ graph LR
 |-------|--------|---------|-----------|---------|
 | 1. Widget Core | ✅ Complete | 2026-03-21 | 2026-03-21 | feat(issue-6): Stage 1 |
 | 2. Build Pipeline | ✅ Complete | 2026-03-21 | 2026-03-21 | feat(issue-6): Stage 2 |
-| 3. Demo + GitHub Pages | 🔄 In Progress | 2026-03-21 | — | — |
+| 3. Demo + GitHub Pages | ✅ Complete | 2026-03-21 | 2026-03-21 | feat(issue-6): Stage 3 |
