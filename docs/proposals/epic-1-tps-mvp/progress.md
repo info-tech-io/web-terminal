@@ -13,7 +13,7 @@ graph TD
         D --> E
     end
 
-    style A fill:#fff9c4,stroke:#f57c00
+    style A fill:#c8e6c9,stroke:#2e7d32
     style B fill:#eeeeee,stroke:#9e9e9e
     style C fill:#eeeeee,stroke:#9e9e9e
     style D fill:#eeeeee,stroke:#9e9e9e
@@ -24,7 +24,7 @@ graph TD
 
 | Child | Title | Status | Progress |
 |-------|-------|--------|----------|
-| [#2](https://github.com/info-tech-io/web-terminal/issues/2) | Phase 0: FastAPI + Refactor | 🔄 In Progress | 0% |
+| [#2](https://github.com/info-tech-io/web-terminal/issues/2) | Phase 0: FastAPI + Refactor | ✅ Complete | 100% |
 | [#3](https://github.com/info-tech-io/web-terminal/issues/3) | Phase 1-A: Pool Manager + Redis | ⏳ Planned | 0% |
 | [#4](https://github.com/info-tech-io/web-terminal/issues/4) | Phase 1-B: Session API | ⏳ Planned | 0% |
 | [#5](https://github.com/info-tech-io/web-terminal/issues/5) | Phase 1-C: Pack rustlings | ⏳ Planned | 0% |

@@ -1,5 +1,7 @@
-flask
+fastapi
+uvicorn[standard]
+websockets
+pydantic-settings
+python-dotenv
 docker
-gevent
-flask-sock
-simple-websocket
+jinja2

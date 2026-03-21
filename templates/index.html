@@ -38,21 +38,33 @@
       const socketURL = protocol + location.hostname + ((location.port) ? (':' + location.port) : '') + '/ws';
       console.log("Attempting to connect to WebSocket at:", socketURL);
 
+      function sendResize(socket) {
+        if (socket.readyState === WebSocket.OPEN) {
+          socket.send(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }));
+        }
+      }
+
       try {
         const socket = new WebSocket(socketURL);
+        socket.binaryType = 'arraybuffer';
 
         socket.onopen = (ev) => {
           console.log("SUCCESS: WebSocket connection opened.", ev);
           term.write('\r\n[CONNECTION ESTABLISHED]\r\n\r\n');
-          
-          // Manual wiring: terminal input -> websocket
+          sendResize(socket);
+
           term.onData(data => {
-            socket.send(data);
+            socket.send(new TextEncoder().encode(data));
           });
 
-          // Manual wiring: websocket -> terminal output
+          term.onResize(() => sendResize(socket));
+
           socket.onmessage = (event) => {
-            term.write(event.data);
+            if (event.data instanceof ArrayBuffer) {
+              term.write(new Uint8Array(event.data));
+            } else {
+              term.write(event.data);
+            }
           };
         };
 
@@ -64,6 +76,8 @@
         socket.onerror = (ev) => {
           console.error("ERROR: WebSocket error.", ev);
         };
+
+        window.addEventListener('beforeunload', () => socket.close());
 
       } catch (e) {
         console.error("FATAL: Failed to create WebSocket.", e);

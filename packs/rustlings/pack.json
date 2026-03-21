@@ -1,0 +1,16 @@
+{
+  "id": "rustlings",
+  "display_name": "Rustlings",
+  "description": "92 упражнения для изучения Rust",
+  "image_tag": "tps-rustlings",
+  "pool": {
+    "size": 3,
+    "session_timeout_sec": 3600
+  },
+  "source": {
+    "repo": "https://github.com/rust-lang/rustlings",
+    "branch": "main",
+    "clone_depth": 1
+  },
+  "exercises": []
+}
