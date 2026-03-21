@@ -5,6 +5,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Optional
 
 from fastapi import FastAPI, HTTPException, WebSocket
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
 from pydantic import BaseModel
@@ -22,6 +23,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Terminal Pool Service", version="0.3.0")
+
+app.mount("/widget", StaticFiles(directory="widget"), name="widget")
 
 templates = Jinja2Templates(directory="templates")
 
