@@ -1,14 +1,14 @@
 # Pack: rustlings — Rust learning exercises
-# Full implementation: Child #5 (Phase 1-C), Issue #5
-FROM ubuntu:22.04
+# Child #5 (Phase 1-C), Issue #5
+# Base: rust:slim — уже содержит Rust toolchain, не нужен rustup/build-essential
+FROM rust:slim
 
-RUN apt-get update && apt-get install -y curl git && \
+RUN apt-get update && apt-get install -y git && \
     rm -rf /var/lib/apt/lists/*
 
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-ENV PATH="/root/.cargo/bin:$PATH"
-
-RUN cargo install rustlings
+RUN rustup component add clippy && \
+    cargo install rustlings && \
+    rm -rf /usr/local/cargo/registry /usr/local/cargo/git
 
 WORKDIR /workspace
 COPY scripts/ /scripts/

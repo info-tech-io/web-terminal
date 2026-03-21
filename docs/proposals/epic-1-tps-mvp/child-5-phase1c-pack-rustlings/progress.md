@@ -1,9 +1,9 @@
-# Progress: Child #5 — Phase 1-C: Pack rustlings
+# Прогресс: Child #5 — Phase 1-C: Pack rustlings
 
 **Issue**: [#5](https://github.com/info-tech-io/web-terminal/issues/5)
-**Status**: 🔄 In Progress
+**Статус**: ✅ Завершён
 
-## Status Dashboard
+## Дашборд
 
 ```mermaid
 graph LR
@@ -12,13 +12,20 @@ graph LR
 
     style A fill:#c8e6c9,stroke:#2e7d32
     style B fill:#c8e6c9,stroke:#2e7d32
-    style C fill:#eeeeee,stroke:#9e9e9e
+    style C fill:#c8e6c9,stroke:#2e7d32
 ```
 
-## Timeline
+## Хронология
 
-| Stage | Status | Started | Completed | Commits |
-|-------|--------|---------|-----------|---------|
-| 1. Dockerfile + pack.json | ✅ Complete | 2026-03-21 | 2026-03-21 | feat(issue-5): fill pack.json |
-| 2. init.sh + exercise.sh | ✅ Complete | 2026-03-21 | 2026-03-21 | a5909dd (Phase 0) |
-| 3. Build + Smoke Test | ⏳ Planned | — | — | — |
+| Stage | Статус | Начат | Завершён | Коммиты |
+|-------|--------|-------|----------|---------|
+| 1. Dockerfile + pack.json | ✅ Завершён | 2026-03-21 | 2026-03-21 | c9e4b41 |
+| 2. init.sh + exercise.sh | ✅ Завершён | 2026-03-21 | 2026-03-21 | a5909dd, c9e4b41 |
+| 3. Build + Smoke Test | ✅ Завершён | 2026-03-21 | 2026-03-21 | (текущий коммит) |
+
+## Definition of Done
+
+- [x] `docker build -t tps-rustlings packs/rustlings/` проходит без ошибок
+- [x] `init.sh` инициализирует rustlings и выводит финальное сообщение
+- [x] `exercise.sh intro1` открывает упражнение (`✓ Successfully ran intro1`)
+- [x] `pack.json` содержит 95 упражнений с корректными ID
