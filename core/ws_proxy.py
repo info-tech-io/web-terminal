@@ -47,7 +47,7 @@ async def handle_ws(websocket: WebSocket, container_id: str) -> None:
                     data = await loop.sock_recv(sock, 4096)
                     if not data:
                         break
-                    await websocket.send_text(data.decode("utf-8", errors="ignore"))
+                    await websocket.send_bytes(data)
             except Exception as exc:
                 logger.debug("container→ws ended: %s", exc)
 
