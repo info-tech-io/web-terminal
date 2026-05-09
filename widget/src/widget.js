@@ -203,7 +203,7 @@ function mount(root, { pack, exercise, tpsUrl }) {
     sessionToken = null;
     closeWs();
     // sendBeacon for reliable delivery during page unload
-    navigator.sendBeacon(`${tpsUrl}/api/sessions/${token}`, null);
+    fetch(`${tpsUrl}/api/sessions/${token}`, { method: 'DELETE', keepalive: true });
   }
 
   window.addEventListener('beforeunload', terminateBeforeUnload);
