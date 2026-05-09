@@ -1,5 +1,13 @@
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
+import xtermCss from '@xterm/xterm/css/xterm.css';
+
+if (!document.getElementById('tps-xterm-css')) {
+  const s = document.createElement('style');
+  s.id = 'tps-xterm-css';
+  s.textContent = xtermCss;
+  document.head.appendChild(s);
+}
 
 // ---------------------------------------------------------------------------
 // Bootstrap: mount all <script data-pack="..."> widgets on the page
@@ -97,7 +105,7 @@ function mount(root, { pack, exercise, tpsUrl }) {
         btnEl.textContent = 'Terminate Session';
         btnEl.disabled = false;
         termWrap.style.display = 'block';
-        if (fitAddon) fitAddon.fit();
+        if (fitAddon) requestAnimationFrame(() => fitAddon.fit());
         break;
 
       case 'no_capacity':

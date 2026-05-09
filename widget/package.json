@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "esbuild src/widget.js --bundle --minify --outfile=widget.js --platform=browser --target=es2017",
-    "build:dev": "esbuild src/widget.js --bundle --outfile=widget.js --platform=browser --target=es2017 --sourcemap"
+    "build": "esbuild src/widget.js --bundle --minify --outfile=widget.js --platform=browser --target=es2017 --loader:.css=text",
+    "build:dev": "esbuild src/widget.js --bundle --outfile=widget.js --platform=browser --target=es2017 --sourcemap --loader:.css=text"
   },
   "dependencies": {
     "@xterm/xterm": "^5.5.0",
