@@ -69,7 +69,7 @@ async def handle_ws(websocket: WebSocket, container_id: str) -> None:
                     # Resize control message: {"type":"resize","cols":N,"rows":M}
                     try:
                         msg = json.loads(raw)
-                        if msg.get("type") == "resize":
+                        if isinstance(msg, dict) and msg.get("type") == "resize":
                             await asyncio.to_thread(
                                 client.api.exec_resize,
                                 exec_id,

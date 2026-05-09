@@ -81,6 +81,7 @@ function mount(root, { pack, exercise, tpsUrl }) {
     'border-radius: 4px',
     'padding: 4px',
     'height: 420px',
+    'overflow: hidden',
   ].join(';');
   root.appendChild(termWrap);
 
@@ -215,14 +216,18 @@ function mount(root, { pack, exercise, tpsUrl }) {
     const wsBase  = tpsUrl.replace(/^https?/, proto);
     const wsUrl   = `${wsBase}${wsPath}`;
 
-    initTerminal();
-
     ws = new WebSocket(wsUrl);
     ws.binaryType = 'arraybuffer';
 
     ws.onopen = () => {
-      transition('connected');
-      sendResize();
+      transition('connected');  // sets display:block — schedules browser layout
+      requestAnimationFrame(() => {
+        // Browser has computed layout: termWrap.clientHeight is now valid
+        // and CharSizeService can measure character dimensions from the DOM.
+        initTerminal();
+        fitAddon.fit();
+        sendResize();
+      });
     };
 
     ws.onmessage = (ev) => {
