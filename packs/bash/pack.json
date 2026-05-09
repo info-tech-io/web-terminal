@@ -1,0 +1,11 @@
+{
+  "id": "bash",
+  "display_name": "Bash",
+  "description": "Интерактивный bash-терминал",
+  "image_tag": "tps-bash",
+
+  "pool": {
+    "size": 3,
+    "session_timeout_sec": 3600
+  }
+}

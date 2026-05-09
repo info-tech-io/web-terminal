@@ -31,7 +31,7 @@ class PackConfig(BaseModel):
     description: str = ""
     image_tag: str
     pool: PoolConfig
-    source: SourceConfig
+    source: Optional[SourceConfig] = None
     exercises: list[ExerciseConfig] = []
 
 

@@ -1,7 +1,7 @@
 # Epic #1: TPS MVP — Terminal Pool Service
 
 **Type**: Epic
-**Status**: In Progress
+**Status**: ✅ Complete
 **Issue**: [#1](https://github.com/info-tech-io/web-terminal/issues/1)
 
 ## Problem Statement
@@ -71,8 +71,8 @@ Docker Host
 
 ## Definition of Done
 
-- [ ] `uvicorn core.app:app` запускает TPS
-- [ ] Пул rustlings-контейнеров поддерживается автоматически
-- [ ] Браузер открывает терминальную сессию одной кнопкой
-- [ ] Контейнер удаляется по завершении сессии, новый поднимается
-- [ ] Демо-страница на GitHub Pages работает
+- [x] `uvicorn core.app:app` запускает TPS
+- [x] Пул rustlings-контейнеров поддерживается автоматически
+- [x] Браузер открывает терминальную сессию одной кнопкой
+- [x] Контейнер удаляется по завершении сессии, новый поднимается
+- [x] Демо-страница на GitHub Pages работает
