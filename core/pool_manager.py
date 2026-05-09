@@ -116,9 +116,28 @@ class PoolManager:
         asyncio.create_task(self._replenish(pack_id))
 
     async def initialize(self) -> None:
-        """Warm up all pack pools at startup."""
+        """Kill orphan containers from previous runs, then warm up pools."""
+        await asyncio.to_thread(self._cleanup_orphans)
         for pack_id in self._packs:
             asyncio.create_task(self._replenish(pack_id))
+
+    def _cleanup_orphans(self) -> None:
+        """Remove all containers labelled tps.pack left over from a previous run."""
+        try:
+            containers = self._get_docker().containers.list(
+                filters={"label": "tps.pack"}
+            )
+            if not containers:
+                return
+            logger.info("Cleaning up %d orphan container(s) from previous run.", len(containers))
+            for c in containers:
+                try:
+                    c.remove(force=True)
+                    logger.info("Removed orphan container %s.", c.id[:12])
+                except Exception as exc:
+                    logger.warning("Could not remove orphan %s: %s", c.id[:12], exc)
+        except Exception as exc:
+            logger.error("Orphan cleanup failed: %s", exc)
 
     async def replenish_loop(self) -> None:
         """Background task: keep all pools at target size."""
