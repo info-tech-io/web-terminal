@@ -141,7 +141,9 @@ class PoolManager:
             pack = self._packs.get(pack_id)
             if pack is None:
                 return
-            needed = pack.pool.size - await self.warm_count(pack_id)
+            warm = await self.warm_count(pack_id)
+            busy = await self.busy_count(pack_id)
+            needed = pack.pool.size - warm - busy
             if needed <= 0:
                 return
             logger.info("Replenishing %d container(s) for pack %s.", needed, pack_id)
