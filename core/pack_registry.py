@@ -8,9 +8,17 @@ from pydantic import BaseModel
 logger = logging.getLogger(__name__)
 
 
-class ExerciseConfig(BaseModel):
+class CourseConfig(BaseModel):
     id: str
     label: str
+
+
+class ExerciseConfig(BaseModel):
+    id: str
+    title: str
+    course: str = ""
+    type: str = "single-expression"
+    difficulty: str = "easy"
     description: str = ""
 
 
@@ -32,6 +40,7 @@ class PackConfig(BaseModel):
     image_tag: str
     pool: PoolConfig
     source: Optional[SourceConfig] = None
+    courses: list[CourseConfig] = []
     exercises: list[ExerciseConfig] = []
 
 

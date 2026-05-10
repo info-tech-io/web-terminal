@@ -6,6 +6,7 @@ from typing import Optional
 import docker
 import docker.errors
 
+from .config import settings
 from .pack_registry import PackConfig
 
 logger = logging.getLogger(__name__)
@@ -173,6 +174,7 @@ class PoolManager:
 
     def _start_warm_container(self, pack: PackConfig) -> Optional[str]:
         try:
+            packs_host_path = str(settings.packs_dir.resolve())
             container = self._get_docker().containers.run(
                 pack.image_tag,
                 tty=True,
@@ -180,6 +182,7 @@ class PoolManager:
                 detach=True,
                 command="/bin/bash",
                 labels={"tps.pack": pack.id},
+                volumes={packs_host_path: {"bind": "/packs", "mode": "ro"}},
             )
             logger.info("Started warm container %s (pack %s).", container.id[:12], pack.id)
             return container.id

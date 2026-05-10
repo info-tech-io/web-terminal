@@ -10,7 +10,7 @@ if (!document.getElementById('tps-xterm-css')) {
 }
 
 // ---------------------------------------------------------------------------
-// Bootstrap: mount all <script data-pack="..."> widgets on the page
+// Bootstrap: auto-mount all <script data-pack="..."> widgets on the page
 // ---------------------------------------------------------------------------
 
 function bootstrap() {
@@ -40,14 +40,17 @@ if (document.readyState === 'loading') {
   bootstrap();
 }
 
-// ---------------------------------------------------------------------------
-// State machine
-// ---------------------------------------------------------------------------
+// Expose global API for programmatic mounting from the exercise list page
+window.TpsWidget = { mount };
 
-// States: idle | loading | connected | no_capacity | error | terminated
+// ---------------------------------------------------------------------------
+// State machine: loading → connected → terminated
+//                         ├──────→ no_capacity (retry button)
+//                         └──────→ error       (retry button)
+// ---------------------------------------------------------------------------
 
 function mount(root, { pack, exercise, tpsUrl }) {
-  let state = 'idle';
+  let state = 'loading';
   let sessionToken = null;
   let ws = null;
   let term = null;
@@ -92,39 +95,34 @@ function mount(root, { pack, exercise, tpsUrl }) {
     termWrap.style.display = 'none';
 
     switch (state) {
-      case 'idle':
-        btnEl.textContent = 'Launch Terminal';
-        btnEl.disabled = false;
-        break;
-
       case 'loading':
-        btnEl.textContent = 'Connecting…';
+        btnEl.textContent = 'Подключение…';
         btnEl.disabled = true;
         break;
 
       case 'connected':
-        btnEl.textContent = 'Terminate Session';
+        btnEl.textContent = 'Завершить сессию';
         btnEl.disabled = false;
         termWrap.style.display = 'block';
         if (fitAddon) requestAnimationFrame(() => fitAddon.fit());
         break;
 
       case 'no_capacity':
-        btnEl.textContent = 'Launch Terminal';
+        btnEl.textContent = 'Попробовать снова';
         btnEl.disabled = false;
-        msgEl.textContent = 'No free containers available. Please try again later.';
+        msgEl.textContent = 'Нет свободных контейнеров. Попробуйте позже.';
         break;
 
       case 'error':
-        btnEl.textContent = 'Retry';
+        btnEl.textContent = 'Повторить';
         btnEl.disabled = false;
-        msgEl.textContent = 'Connection error. Please try again.';
+        msgEl.textContent = 'Ошибка подключения. Попробуйте ещё раз.';
         break;
 
       case 'terminated':
-        btnEl.textContent = 'Launch Terminal';
+        btnEl.textContent = 'Открыть снова';
         btnEl.disabled = false;
-        msgEl.textContent = 'Session ended.';
+        msgEl.textContent = 'Сессия завершена.';
         destroyTerminal();
         break;
     }
@@ -135,12 +133,10 @@ function mount(root, { pack, exercise, tpsUrl }) {
     render();
   }
 
-  render();
-
   // -- Button ---------------------------------------------------------------
 
   btnEl.addEventListener('click', () => {
-    if (state === 'idle' || state === 'no_capacity' || state === 'error' || state === 'terminated') {
+    if (state === 'no_capacity' || state === 'error' || state === 'terminated') {
       msgEl.textContent = '';
       transition('loading');
       requestSession();
@@ -203,7 +199,6 @@ function mount(root, { pack, exercise, tpsUrl }) {
     const token = sessionToken;
     sessionToken = null;
     closeWs();
-    // sendBeacon for reliable delivery during page unload
     fetch(`${tpsUrl}/api/sessions/${token}`, { method: 'DELETE', keepalive: true });
   }
 
@@ -220,10 +215,8 @@ function mount(root, { pack, exercise, tpsUrl }) {
     ws.binaryType = 'arraybuffer';
 
     ws.onopen = () => {
-      transition('connected');  // sets display:block — schedules browser layout
+      transition('connected');
       requestAnimationFrame(() => {
-        // Browser has computed layout: termWrap.clientHeight is now valid
-        // and CharSizeService can measure character dimensions from the DOM.
         initTerminal();
         fitAddon.fit();
         sendResize();
@@ -297,4 +290,8 @@ function mount(root, { pack, exercise, tpsUrl }) {
     const msg = JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows });
     ws.send(new TextEncoder().encode(msg));
   }
+
+  // Autoconnect: start session immediately on mount
+  render();
+  requestSession();
 }

@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+from typing import Optional
 
 import docker
 from fastapi import WebSocket, WebSocketDisconnect
@@ -8,13 +9,12 @@ from fastapi import WebSocket, WebSocketDisconnect
 logger = logging.getLogger(__name__)
 
 
-async def handle_ws(websocket: WebSocket, container_id: str) -> None:
-    """Handle a WebSocket connection: bridge browser ↔ Docker PTY.
-
-    Args:
-        websocket: FastAPI WebSocket connection.
-        container_id: ID of the pre-allocated container from the pool.
-    """
+async def handle_ws(
+    websocket: WebSocket,
+    container_id: str,
+    pack_id: str = "",
+    exercise_id: Optional[str] = None,
+) -> None:
     await websocket.accept()
     logger.info("WebSocket accepted for container %s.", container_id[:12])
 
@@ -22,14 +22,27 @@ async def handle_ws(websocket: WebSocket, container_id: str) -> None:
     try:
         container = await asyncio.to_thread(client.containers.get, container_id)
 
-        exec_instance = await asyncio.to_thread(
-            client.api.exec_create,
-            container.id,
-            "bash",
+        if exercise_id:
+            cmd = ["bash", f"/packs/{pack_id}/scripts/session.sh"]
+            env = {"PACK_ID": pack_id, "EXERCISE_ID": exercise_id}
+        else:
+            cmd = "bash"
+            env = None
+
+        exec_kwargs = dict(
             stdout=True,
             stderr=True,
             stdin=True,
             tty=True,
+        )
+        if env:
+            exec_kwargs["environment"] = env
+
+        exec_instance = await asyncio.to_thread(
+            client.api.exec_create,
+            container.id,
+            cmd,
+            **exec_kwargs,
         )
         exec_id = exec_instance["Id"]
 
@@ -53,8 +66,6 @@ async def handle_ws(websocket: WebSocket, container_id: str) -> None:
             except Exception as exc:
                 logger.debug("container→ws ended: %s", exc)
             if container_exited_cleanly:
-                # bash exited (e.g. user typed "exit") — close WS so the browser
-                # gets onclose and transitions out of "connected" state immediately.
                 logger.info("Container %s exited, closing WebSocket.", container_id[:12])
                 try:
                     await websocket.close(code=1000)

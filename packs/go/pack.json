@@ -1,0 +1,39 @@
+{
+  "id": "go",
+  "display_name": "Go",
+  "description": "Практика на Go",
+  "image_tag": "tps-go",
+
+  "pool": {
+    "size": 3,
+    "session_timeout_sec": 3600
+  },
+
+  "courses": [
+    { "id": "go-basics", "label": "Go: основы" }
+  ],
+
+  "exercises": [
+    {
+      "id": "go-expr-01",
+      "title": "Таблица умножения",
+      "course": "go-basics",
+      "type": "single-expression",
+      "difficulty": "easy"
+    },
+    {
+      "id": "go-func-01",
+      "title": "Реверс строки",
+      "course": "go-basics",
+      "type": "function",
+      "difficulty": "easy"
+    },
+    {
+      "id": "go-multi-01",
+      "title": "Пакет mathutils",
+      "course": "go-basics",
+      "type": "multi-file",
+      "difficulty": "medium"
+    }
+  ]
+}

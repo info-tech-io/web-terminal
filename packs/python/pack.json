@@ -1,0 +1,39 @@
+{
+  "id": "python",
+  "display_name": "Python",
+  "description": "Практика на Python",
+  "image_tag": "tps-python",
+
+  "pool": {
+    "size": 3,
+    "session_timeout_sec": 3600
+  },
+
+  "courses": [
+    { "id": "python-basics", "label": "Python: основы" }
+  ],
+
+  "exercises": [
+    {
+      "id": "py-expr-01",
+      "title": "List Comprehension",
+      "course": "python-basics",
+      "type": "single-expression",
+      "difficulty": "easy"
+    },
+    {
+      "id": "py-func-01",
+      "title": "Палиндром",
+      "course": "python-basics",
+      "type": "function",
+      "difficulty": "easy"
+    },
+    {
+      "id": "py-multi-01",
+      "title": "Калькулятор",
+      "course": "python-basics",
+      "type": "multi-file",
+      "difficulty": "medium"
+    }
+  ]
+}

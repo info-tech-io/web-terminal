@@ -12,7 +12,7 @@ from fastapi.requests import Request
 from pydantic import BaseModel
 
 from .config import settings
-from .pack_registry import PackRegistry, PackConfig
+from .pack_registry import PackRegistry, PackConfig, ExerciseConfig
 from .pool_manager import PoolManager, InMemoryStore
 from .session import create_token, verify_token
 from .ws_proxy import handle_ws
@@ -23,11 +23,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Terminal Pool Service", version="0.3.0")
+app = FastAPI(title="Terminal Pool Service", version="0.4.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://info-tech-io.github.io"],
+    allow_origins=settings.tps_cors_origins,
     allow_methods=["GET", "POST", "DELETE"],
     allow_headers=["Content-Type"],
 )
@@ -58,6 +58,19 @@ async def startup() -> None:
 # Response models
 # ---------------------------------------------------------------------------
 
+class ExerciseSummary(BaseModel):
+    id: str
+    title: str
+    course: str
+    type: str
+    difficulty: str
+
+
+class CourseSummary(BaseModel):
+    id: str
+    label: str
+
+
 class PackSummary(BaseModel):
     id: str
     display_name: str
@@ -65,11 +78,12 @@ class PackSummary(BaseModel):
     pool_size: int
     pool_warm: int
     pool_busy: int
+    courses: list[CourseSummary]
+    exercises: list[ExerciseSummary]
 
 
 class PackDetail(PackSummary):
     image_tag: str
-    exercises: list
 
 
 class SessionRequest(BaseModel):
@@ -98,6 +112,14 @@ async def list_packs():
             pool_size=pack.pool.size,
             pool_warm=await pool_manager.warm_count(pack.id),
             pool_busy=await pool_manager.busy_count(pack.id),
+            courses=[CourseSummary(id=c.id, label=c.label) for c in pack.courses],
+            exercises=[
+                ExerciseSummary(
+                    id=e.id, title=e.title, course=e.course,
+                    type=e.type, difficulty=e.difficulty,
+                )
+                for e in pack.exercises
+            ],
         ))
     return result
 
@@ -115,8 +137,26 @@ async def get_pack(pack_id: str):
         pool_size=pack.pool.size,
         pool_warm=await pool_manager.warm_count(pack.id),
         pool_busy=await pool_manager.busy_count(pack.id),
-        exercises=[e.model_dump() for e in pack.exercises],
+        courses=[CourseSummary(id=c.id, label=c.label) for c in pack.courses],
+        exercises=[
+            ExerciseSummary(
+                id=e.id, title=e.title, course=e.course,
+                type=e.type, difficulty=e.difficulty,
+            )
+            for e in pack.exercises
+        ],
     )
+
+
+@app.get("/api/packs/{pack_id}/exercises/{exercise_id}")
+async def get_exercise(pack_id: str, exercise_id: str):
+    pack = registry.get(pack_id)
+    if pack is None:
+        raise HTTPException(status_code=404, detail="Pack not found")
+    exercise = next((e for e in pack.exercises if e.id == exercise_id), None)
+    if exercise is None:
+        raise HTTPException(status_code=404, detail="Exercise not found")
+    return exercise.model_dump()
 
 
 # ---------------------------------------------------------------------------
@@ -128,6 +168,11 @@ async def create_session(body: SessionRequest):
     pack = registry.get(body.pack_id)
     if pack is None:
         raise HTTPException(status_code=404, detail="Pack not found")
+
+    if body.exercise_id is not None:
+        exercise = next((e for e in pack.exercises if e.id == body.exercise_id), None)
+        if exercise is None:
+            raise HTTPException(status_code=404, detail="Exercise not found")
 
     container_id = await pool_manager.allocate(body.pack_id)
     if container_id is None:
@@ -171,7 +216,7 @@ async def websocket_session(websocket: WebSocket, token: str):
 
     try:
         await asyncio.wait_for(
-            handle_ws(websocket, payload.container_id),
+            handle_ws(websocket, payload.container_id, payload.pack_id, payload.exercise_id),
             timeout=float(remaining_ttl),
         )
     except asyncio.TimeoutError:

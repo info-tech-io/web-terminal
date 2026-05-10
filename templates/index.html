@@ -1,30 +1,218 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Web Terminal</title>
+  <title>Terminal Practice</title>
   <style>
     * { box-sizing: border-box; }
-    body { font-family: sans-serif; max-width: 960px; margin: 40px auto; padding: 0 20px; color: #333; }
+    body {
+      font-family: sans-serif;
+      max-width: 960px;
+      margin: 40px auto;
+      padding: 0 20px;
+      color: #333;
+      background: #fafafa;
+    }
     h1 { font-size: 1.6rem; margin-bottom: 4px; }
-    p { color: #555; margin-top: 4px; }
-    footer { margin-top: 24px; font-size: 0.8rem; color: #999; }
+    .subtitle { color: #666; margin-top: 4px; margin-bottom: 32px; }
+
+    .pack-section { margin-bottom: 28px; }
+    .pack-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 6px;
+      margin-bottom: 8px;
+    }
+    .exercise-row {
+      display: flex;
+      align-items: center;
+      padding: 8px 4px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .exercise-row:last-child { border-bottom: none; }
+    .badge {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      margin-right: 10px;
+      font-weight: 600;
+      min-width: 44px;
+      text-align: center;
+    }
+    .badge-easy   { background: #e8f5e9; color: #2e7d32; }
+    .badge-medium { background: #fff3e0; color: #e65100; }
+    .badge-hard   { background: #fce4ec; color: #b71c1c; }
+    .exercise-title { flex: 1; font-size: 0.95rem; }
+    .btn-open {
+      padding: 4px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      border: 1px solid #1565c0;
+      border-radius: 3px;
+      background: #fff;
+      color: #1565c0;
+    }
+    .btn-open:hover   { background: #1565c0; color: #fff; }
+    .btn-open.active  { background: #1565c0; color: #fff; }
+
+    #widget-area {
+      margin-top: 32px;
+      border-top: 2px solid #e0e0e0;
+      padding-top: 20px;
+      display: none;
+    }
+    #widget-header {
+      font-size: 0.9rem;
+      color: #555;
+      margin-bottom: 12px;
+    }
+
+    .msg-loading { color: #666; font-style: italic; }
+    .msg-error   { color: #c62828; }
+    footer { margin-top: 40px; font-size: 0.8rem; color: #999; }
     footer a { color: #999; }
   </style>
 </head>
 <body>
-  <h1>Web Terminal</h1>
-  <p>Interactive bash terminal in your browser. Click the button to start.</p>
+  <h1>Terminal Practice</h1>
+  <p class="subtitle">Выбери упражнение — терминал откроется автоматически.</p>
 
-  <script src="/widget/widget.js?v=3"
-          data-pack="bash"
-          data-tps-url=""
-          defer>
-  </script>
+  <div id="exercise-list"><p class="msg-loading">Загрузка упражнений…</p></div>
+
+  <div id="widget-area">
+    <div id="widget-header"></div>
+    <div id="widget-root"></div>
+  </div>
 
   <footer>
     <a href="/docs">API docs</a> · <a href="/api/packs">Pool status</a>
   </footer>
+
+  <!-- Widget bundle: exposes window.TpsWidget.mount() -->
+  <script src="/widget/widget.js?v=4"></script>
+
+  <script>
+    (function () {
+      var activeBtn = null;
+      var activeToken = null;
+
+      // -----------------------------------------------------------------------
+      // Load exercise list from /api/packs
+      // -----------------------------------------------------------------------
+      async function loadExercises() {
+        var listEl = document.getElementById('exercise-list');
+        try {
+          var resp = await fetch('/api/packs');
+          if (!resp.ok) throw new Error('HTTP ' + resp.status);
+          var packs = await resp.json();
+
+          if (!packs.length) {
+            listEl.innerHTML = '<p class="msg-error">Паки не найдены.</p>';
+            return;
+          }
+
+          listEl.innerHTML = '';
+
+          packs.forEach(function (pack) {
+            if (!pack.exercises || !pack.exercises.length) return;
+
+            // Group exercises by course
+            var courseMap = {};
+            pack.exercises.forEach(function (ex) {
+              var key = ex.course || pack.id;
+              if (!courseMap[key]) courseMap[key] = { label: key, exercises: [] };
+              courseMap[key].exercises.push(ex);
+            });
+
+            // Replace raw course IDs with display labels
+            (pack.courses || []).forEach(function (c) {
+              if (courseMap[c.id]) courseMap[c.id].label = c.label;
+            });
+
+            Object.values(courseMap).forEach(function (course) {
+              var section = document.createElement('div');
+              section.className = 'pack-section';
+
+              var titleEl = document.createElement('div');
+              titleEl.className = 'pack-title';
+              titleEl.textContent = course.label;
+              section.appendChild(titleEl);
+
+              course.exercises.forEach(function (ex) {
+                var row = document.createElement('div');
+                row.className = 'exercise-row';
+
+                var badge = document.createElement('span');
+                badge.className = 'badge badge-' + (ex.difficulty || 'easy');
+                badge.textContent = { easy: 'easy', medium: 'med.', hard: 'hard' }[ex.difficulty] || ex.difficulty || '—';
+                row.appendChild(badge);
+
+                var nameEl = document.createElement('span');
+                nameEl.className = 'exercise-title';
+                nameEl.textContent = ex.title;
+                row.appendChild(nameEl);
+
+                var btn = document.createElement('button');
+                btn.className = 'btn-open';
+                btn.textContent = 'открыть';
+                btn.addEventListener('click', function () {
+                  openExercise(pack, ex, btn);
+                });
+                row.appendChild(btn);
+
+                section.appendChild(row);
+              });
+
+              listEl.appendChild(section);
+            });
+          });
+        } catch (err) {
+          listEl.innerHTML = '<p class="msg-error">Ошибка загрузки: ' + err.message + '</p>';
+        }
+      }
+
+      // -----------------------------------------------------------------------
+      // Open exercise: terminate previous session, mount new widget
+      // -----------------------------------------------------------------------
+      async function openExercise(pack, exercise, btn) {
+        // Terminate previous session
+        if (activeToken) {
+          try { await fetch('/api/sessions/' + activeToken, { method: 'DELETE' }); } catch (_) {}
+          activeToken = null;
+        }
+
+        // Update button states
+        if (activeBtn && activeBtn !== btn) {
+          activeBtn.classList.remove('active');
+          activeBtn.textContent = 'открыть';
+        }
+        activeBtn = btn;
+        btn.classList.add('active');
+        btn.textContent = 'активно';
+
+        // Show widget area
+        var widgetArea = document.getElementById('widget-area');
+        var header = document.getElementById('widget-header');
+        var root = document.getElementById('widget-root');
+
+        header.textContent = pack.display_name + ' → ' + exercise.title;
+        widgetArea.style.display = 'block';
+        root.innerHTML = '';
+
+        // Mount widget (window.TpsWidget.mount set by widget.js bundle)
+        window.TpsWidget.mount(root, {
+          pack: pack.id,
+          exercise: exercise.id,
+          tpsUrl: '',
+        });
+
+        widgetArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      loadExercises();
+    })();
+  </script>
 </body>
 </html>

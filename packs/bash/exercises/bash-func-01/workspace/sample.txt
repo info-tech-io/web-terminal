@@ -1,0 +1,3 @@
+The quick brown fox jumps over the lazy dog.
+Bash scripting is a powerful skill for automation.
+Practice makes perfect.

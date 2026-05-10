@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     packs_dir: Path = Path("packs")
     tps_jwt_secret: str = "change-me-in-production"
     tps_jwt_algorithm: str = "HS256"
+    tps_cors_origins: list[str] = ["https://info-tech-io.github.io"]
 
     class Config:
         env_file = ".env"

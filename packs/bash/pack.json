@@ -1,11 +1,39 @@
 {
   "id": "bash",
   "display_name": "Bash",
-  "description": "Интерактивный bash-терминал",
+  "description": "Скриптинг на Bash",
   "image_tag": "tps-bash",
 
   "pool": {
     "size": 3,
     "session_timeout_sec": 3600
-  }
+  },
+
+  "courses": [
+    { "id": "bash-scripting", "label": "Bash: скриптинг" }
+  ],
+
+  "exercises": [
+    {
+      "id": "bash-expr-01",
+      "title": "Поиск исполняемых файлов",
+      "course": "bash-scripting",
+      "type": "single-expression",
+      "difficulty": "easy"
+    },
+    {
+      "id": "bash-func-01",
+      "title": "Подсчёт слов",
+      "course": "bash-scripting",
+      "type": "function",
+      "difficulty": "easy"
+    },
+    {
+      "id": "bash-multi-01",
+      "title": "Система логирования",
+      "course": "bash-scripting",
+      "type": "multi-file",
+      "difficulty": "medium"
+    }
+  ]
 }
