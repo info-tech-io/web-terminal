@@ -26,7 +26,7 @@ async def login(request: Request):
     form = await request.form()
     if form.get("token") == WEB_TOKEN:
         response = RedirectResponse(f"{ROOT}/", status_code=302)
-        response.set_cookie("auth_token", WEB_TOKEN, httponly=True, samesite="strict")
+        response.set_cookie("auth_token", WEB_TOKEN, httponly=True, samesite="strict", secure=True)
         return response
     return RedirectResponse(f"{ROOT}/login?error=1", status_code=302)
 

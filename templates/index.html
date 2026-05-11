@@ -30,7 +30,7 @@
     fitAddon.fit();
 
     const protocol = location.protocol === 'https:' ? 'wss://' : 'ws://';
-    const wsURL = protocol + location.host + '/ws';
+    const wsURL = protocol + location.host + location.pathname.replace(/\/$/, '') + '/ws';
     const socket = new WebSocket(wsURL);
     socket.binaryType = 'arraybuffer';
 
