@@ -1,0 +1,14 @@
+services:
+  ai-box:
+    build: .
+    image: ai-box
+    container_name: ai-box
+    restart: always
+    env_file:
+      - ~/ai/.env
+    volumes:
+      - ~/ai:/root/ai
+    ports:
+      - "127.0.0.1:8080:8080"
+    tty: true
+    stdin_open: true

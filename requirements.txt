@@ -1,5 +1,4 @@
-flask
-docker
-gevent
-flask-sock
-simple-websocket
+fastapi
+uvicorn[standard]
+websockets
+python-multipart
