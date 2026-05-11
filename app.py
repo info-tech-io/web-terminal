@@ -7,10 +7,12 @@ import termios
 
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 
 ROOT = os.environ.get("ROOT_PATH", "")  # e.g. "/claude" when behind nginx subpath
 
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 WEB_TOKEN = os.environ["WEB_TOKEN"]
 

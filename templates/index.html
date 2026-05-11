@@ -3,13 +3,15 @@
 <head>
   <title>AI Box</title>
   <meta charset="utf-8">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" />
-  <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
+  <link rel="stylesheet" href="static/xterm.css" />
+  <script src="static/xterm.js"></script>
+  <script src="static/xterm-addon-fit.js"></script>
   <style>
+    * { box-sizing: border-box; }
     body, html {
       margin: 0;
       padding: 0;
+      width: 100%;
       height: 100%;
       background: #000;
       overflow: hidden;
@@ -23,57 +25,42 @@
 <body>
   <div id="terminal"></div>
   <script>
-    const term = new Terminal({ cursorBlink: true, scrollback: 5000 });
+    const term = new Terminal({ cursorBlink: true, scrollback: 5000, fontSize: 13, fontFamily: "monospace" });
     const fitAddon = new FitAddon.FitAddon();
     term.loadAddon(fitAddon);
     term.open(document.getElementById('terminal'));
-    fitAddon.fit();
 
-    const protocol = location.protocol === 'https:' ? 'wss://' : 'ws://';
-    const wsURL = protocol + location.host + location.pathname.replace(/\/$/, '') + '/ws';
-    const socket = new WebSocket(wsURL);
-    socket.binaryType = 'arraybuffer';
+    document.fonts.ready.then(() => {
+      fitAddon.fit();
+      connectWS();
+    });
 
-    socket.onopen = () => {
-      // Send initial terminal size
-      sendResize();
+    function connectWS() {
+      const protocol = location.protocol === 'https:' ? 'wss://' : 'ws://';
+      const wsURL = protocol + location.host + location.pathname.replace(/\/$/, '') + '/ws';
+      const socket = new WebSocket(wsURL);
+      socket.binaryType = 'arraybuffer';
 
-      term.onData(data => {
-        socket.send(new TextEncoder().encode(data));
-      });
+      socket.onopen = () => {
+        sendResize(socket);
+        term.onData(data => { socket.send(new TextEncoder().encode(data)); });
+        term.onResize(() => { sendResize(socket); });
+      };
 
-      term.onResize(({ rows, cols }) => {
-        sendResize(rows, cols);
-      });
-    };
-
-    socket.onmessage = (event) => {
-      term.write(new Uint8Array(event.data));
-    };
-
-    socket.onclose = (ev) => {
-      term.write(`\r\n\r\n[Disconnected: ${ev.code}]\r\n`);
-    };
-
-    socket.onerror = () => {
-      term.write('\r\n[WebSocket error]\r\n');
-    };
-
-    function sendResize(rows, cols) {
-      rows = rows || term.rows;
-      cols = cols || term.cols;
-      const buf = new Uint8Array(5);
-      buf[0] = 0x01;
-      new DataView(buf.buffer).setUint16(1, rows, false);
-      new DataView(buf.buffer).setUint16(3, cols, false);
-      if (socket.readyState === WebSocket.OPEN) {
-        socket.send(buf);
-      }
+      socket.onmessage = (event) => { term.write(new Uint8Array(event.data)); };
+      socket.onclose = (ev) => { term.write(`\r\n\r\n[Disconnected: ${ev.code}]\r\n`); };
+      socket.onerror = () => { term.write('\r\n[WebSocket error]\r\n'); };
     }
 
-    window.addEventListener('resize', () => {
-      fitAddon.fit();
-    });
+    function sendResize(socket) {
+      const buf = new Uint8Array(5);
+      buf[0] = 0x01;
+      new DataView(buf.buffer).setUint16(1, term.rows, false);
+      new DataView(buf.buffer).setUint16(3, term.cols, false);
+      if (socket.readyState === WebSocket.OPEN) socket.send(buf);
+    }
+
+    window.addEventListener('resize', () => { fitAddon.fit(); });
   </script>
 </body>
 </html>
