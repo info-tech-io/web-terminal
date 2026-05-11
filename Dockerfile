@@ -18,6 +18,7 @@ RUN chmod +x entrypoint.sh
 
 COPY app.py .
 COPY templates/ templates/
+COPY static/ static/
 
 ENV HOME=/root/ai
 
