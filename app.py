@@ -8,6 +8,8 @@ import termios
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse, RedirectResponse
 
+ROOT = os.environ.get("ROOT_PATH", "")  # e.g. "/claude" when behind nginx subpath
+
 app = FastAPI()
 
 WEB_TOKEN = os.environ["WEB_TOKEN"]
@@ -23,16 +25,16 @@ async def login_page():
 async def login(request: Request):
     form = await request.form()
     if form.get("token") == WEB_TOKEN:
-        response = RedirectResponse("/", status_code=302)
+        response = RedirectResponse(f"{ROOT}/", status_code=302)
         response.set_cookie("auth_token", WEB_TOKEN, httponly=True, samesite="strict")
         return response
-    return RedirectResponse("/login?error=1", status_code=302)
+    return RedirectResponse(f"{ROOT}/login?error=1", status_code=302)
 
 
 @app.get("/")
 async def index(request: Request):
     if request.cookies.get("auth_token") != WEB_TOKEN:
-        return RedirectResponse("/login")
+        return RedirectResponse(f"{ROOT}/login")
     with open("templates/index.html") as f:
         return HTMLResponse(f.read())
 
