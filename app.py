@@ -6,21 +6,28 @@ import struct
 import termios
 
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 
-ROOT = os.environ.get("ROOT_PATH", "")  # e.g. "/claude" when behind nginx subpath
+ROOT         = os.environ.get("ROOT_PATH", "")
+WEB_TOKEN    = os.environ["WEB_TOKEN"]
+TMUX_SESSION = os.environ.get("TMUX_SESSION", "main")
+PTY_ROWS     = int(os.environ.get("PTY_ROWS", "60"))
+PTY_COLS     = int(os.environ.get("PTY_COLS", "220"))
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
 
-WEB_TOKEN = os.environ["WEB_TOKEN"]
+
+def authenticated(request: Request) -> bool:
+    return request.cookies.get("auth_token") == WEB_TOKEN
 
 
 @app.get("/login")
-async def login_page():
-    with open("templates/login.html") as f:
-        return HTMLResponse(f.read())
+async def login_page(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
 
 
 @app.post("/login")
@@ -35,10 +42,9 @@ async def login(request: Request):
 
 @app.get("/")
 async def index(request: Request):
-    if request.cookies.get("auth_token") != WEB_TOKEN:
+    if not authenticated(request):
         return RedirectResponse(f"{ROOT}/login")
-    with open("templates/index.html") as f:
-        return HTMLResponse(f.read())
+    return templates.TemplateResponse("index.html", {"request": request})
 
 
 @app.websocket("/ws")
@@ -50,11 +56,10 @@ async def terminal(ws: WebSocket):
     await ws.accept()
 
     master_fd, slave_fd = pty.openpty()
-    # Match the tmux session's initial dimensions so attach doesn't shrink it
     fcntl.ioctl(master_fd, termios.TIOCSWINSZ,
-                struct.pack("HHHH", 60, 220, 0, 0))
+                struct.pack("HHHH", PTY_ROWS, PTY_COLS, 0, 0))
     proc = await asyncio.create_subprocess_exec(
-        "tmux", "attach-session", "-t", "main",
+        "tmux", "attach-session", "-t", TMUX_SESSION,
         stdin=slave_fd, stdout=slave_fd, stderr=slave_fd,
         close_fds=True,
     )

@@ -20,7 +20,7 @@ COPY app.py .
 COPY templates/ templates/
 COPY static/ static/
 
-ENV HOME=/root/ai
+ENV HOME=/root/ai-box
 
 EXPOSE 8080
 

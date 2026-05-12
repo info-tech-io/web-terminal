@@ -5,13 +5,13 @@ services:
     container_name: ai-box
     restart: always
     env_file:
-      - ~/ai/.env
+      - ~/ai-box/.env
     environment:
       - ROOT_PATH=/claude
     volumes:
-      - ~/ai:/root/ai
-      - ~/ai/.claude:/root/.claude
-      - ~/ai/.claude.json:/root/.claude.json
+      - ~/ai-box:/root/ai-box
+      - ~/ai-box/.claude:/root/.claude
+      - ~/ai-box/.claude.json:/root/.claude.json
     ports:
       - "127.0.0.1:8000:8080"
     tty: true
