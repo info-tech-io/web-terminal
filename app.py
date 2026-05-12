@@ -27,7 +27,7 @@ def authenticated(request: Request) -> bool:
 
 @app.get("/login")
 async def login_page(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
+    return templates.TemplateResponse(request, "login.html")
 
 
 @app.post("/login")
@@ -44,7 +44,7 @@ async def login(request: Request):
 async def index(request: Request):
     if not authenticated(request):
         return RedirectResponse(f"{ROOT}/login")
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request, "index.html")
 
 
 @app.websocket("/ws")
