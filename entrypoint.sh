@@ -10,7 +10,7 @@ fi
 
 # Create detached tmux session with Claude Code if not already running
 if ! tmux has-session -t "$SESSION" 2>/dev/null; then
-    tmux new-session -d -s "$SESSION" -x 220 -y 60 "claude"
+    tmux new-session -d -s "$SESSION" -x 220 -y 60 "cd /root/ai/projects && claude"
 fi
 
 # Start FastAPI
