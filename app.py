@@ -50,6 +50,9 @@ async def terminal(ws: WebSocket):
     await ws.accept()
 
     master_fd, slave_fd = pty.openpty()
+    # Match the tmux session's initial dimensions so attach doesn't shrink it
+    fcntl.ioctl(master_fd, termios.TIOCSWINSZ,
+                struct.pack("HHHH", 60, 220, 0, 0))
     proc = await asyncio.create_subprocess_exec(
         "tmux", "attach-session", "-t", "main",
         stdin=slave_fd, stdout=slave_fd, stderr=slave_fd,
